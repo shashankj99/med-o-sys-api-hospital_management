@@ -1,5 +1,7 @@
 const express = require('express');
+
 const db = require('./models');
+const routes = require('./routes');
 
 const app = express();
 
@@ -16,3 +18,6 @@ app.listen(35802, () => {
 db.sequelize.sync()
     .then(() => console.log('DB connection successful'))
     .catch(err => console.log(err.message));
+
+// include all routes
+app.use('/', routes);
