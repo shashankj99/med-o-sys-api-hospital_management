@@ -38,6 +38,19 @@ class AuthUser
     {
         return this.userObj.hospital;
     }
+
+    /**
+     * Method to check if user has that role
+     * @param roles
+     */
+    static has_role(roles)
+    {
+        // get roles from object
+        const rolesFromObj = this.userObj.roles;
+
+        // check if some of the array value falls in the roleFrom object array
+        return roles.some(role => rolesFromObj.includes(role));
+    }
 }
 
 module.exports = AuthUser;

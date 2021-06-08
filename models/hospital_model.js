@@ -15,16 +15,14 @@ module.exports = (sequelize, Sequelize) => {
         phone_no: {
             type: Sequelize.STRING(15),
             validate: {
-                min: 7,
-                max: 15
+                min: 7
             },
             allowNull: true
         },
         mobile_no: {
             type: Sequelize.STRING(15),
             validate: {
-                min: 7,
-                max: 15
+                min: 7
             },
             allowNull: true
         },
@@ -38,6 +36,7 @@ module.exports = (sequelize, Sequelize) => {
         },
         website: {
             type: Sequelize.STRING,
+            unique: true,
             allowNull: false
         },
         status: {
