@@ -41,7 +41,13 @@ const auth = (req, res, next) =>
 
                 next();
             })
-            .catch(err => console.log(err.message));
+            .catch(err => {
+                return res.status(400)
+                    .json({
+                       status: 400,
+                       message: err.message
+                    });
+            });
     } catch (error) {
         return res.status(401)
             .json({
