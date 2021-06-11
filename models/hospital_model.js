@@ -1,5 +1,5 @@
 module.exports = (sequelize, Sequelize) => {
-    return sequelize.define('hospitals', {
+    return sequelize.define('Hospital', {
         name: {
             type: Sequelize.STRING,
             allowNull: false
@@ -45,8 +45,9 @@ module.exports = (sequelize, Sequelize) => {
             defaultValue: true
         }
     }, {
+        tableName: 'hospitals',
         timestamps: true,
         createdAt: 'created_at',
         updatedAt: 'updated_at'
-    })
+    });
 };

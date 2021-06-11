@@ -27,7 +27,6 @@ const HospitalRequest = {
                     })
             }),
 
-
         check('website').exists().withMessage('Website is required')
             .custom(value => {
                 return Hospital.findOne({ where: {website: value} })
@@ -35,7 +34,10 @@ const HospitalRequest = {
                         if (hospital)
                             return Promise.reject('Website has already taken')
                     })
-            })
+            }),
+
+        check('departments').exists().withMessage('Departments are required')
+            .isArray().withMessage('Departments must be an array')
     ],
 
     /**
@@ -54,6 +56,9 @@ const HospitalRequest = {
         check('email_address').exists().withMessage('Email address is required')
             .isEmail().withMessage('Email address must be a valid email'),
 
+        check('departments').exists().withMessage('Departments are required')
+            .isArray().withMessage('Departments must be an array'),
+
         async function (req, res, next) {
             const hospitalId = req.params.hospital_id;
 
@@ -71,7 +76,7 @@ const HospitalRequest = {
                                 ]
                             });
                     next();
-                });
+                }).catch(err => next());
         },
 
         async function (req, res, next) {
@@ -92,7 +97,7 @@ const HospitalRequest = {
                             });
 
                     next();
-                });
+                }).catch(err => next());
         }
     ]
 };

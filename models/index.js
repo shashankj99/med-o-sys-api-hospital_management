@@ -12,5 +12,8 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.hospitals = require('./hospital_model')(sequelize, Sequelize);
+db.departments = require('./department.model')(sequelize, Sequelize);
+
+db.associations = require('./associations')(sequelize);
 
 module.exports = db;
