@@ -75,8 +75,8 @@ const HospitalRequest = {
                                     {email_address: "Email address has already been taken"}
                                 ]
                             });
-                    next();
-                }).catch(err => next());
+                    return next();
+                }).catch(err => {return next()});
         },
 
         async function (req, res, next) {
@@ -96,8 +96,8 @@ const HospitalRequest = {
                                 ]
                             });
 
-                    next();
-                }).catch(err => next());
+                    return next();
+                }).catch(err => {return next()});
         }
     ]
 };

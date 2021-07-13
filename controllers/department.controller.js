@@ -1,5 +1,4 @@
 const db = require('../models');
-const AuthUser = require('../facade/auth_user');
 
 const Department = db.departments;
 
@@ -43,14 +42,6 @@ const DepartmentController = {
      */
     create_department: async (req, res) => {
         try {
-            // forbid user from creating department
-            if (!AuthUser.has_role(['super admin']))
-                return res.status(401)
-                    .json({
-                        status: 401,
-                        message: 'Forbidden'
-                    });
-
             // get department attributes
             const departmentAttributes = {
                 name: req.body.name,
@@ -89,13 +80,6 @@ const DepartmentController = {
      */
     get_department_detail: async (req, res) => {
         try {
-            if (!AuthUser.has_role(['super admin']))
-                return res.status(401)
-                    .json({
-                        status: 401,
-                        message: 'Forbidden'
-                    });
-
             // get the department id
             const departmentId = req.params.department_id;
 
@@ -139,13 +123,6 @@ const DepartmentController = {
      */
     update_department: async (req, res) => {
         try {
-            if (!AuthUser.has_role(['super admin']))
-                return res.status(401)
-                    .json({
-                        status: 401,
-                        message: 'Forbidden'
-                    });
-
             // get department id
             const departmentId = req.params.department_id;
 
@@ -197,13 +174,6 @@ const DepartmentController = {
      */
     delete_department: async (req, res) => {
         try {
-            if (!AuthUser.has_role(['super admin']))
-                return res.status(401)
-                    .json({
-                        status: 401,
-                        message: 'Forbidden'
-                    });
-
             const departmentId = req.params.department_id;
 
             await Department.destroy({ where: {id: departmentId} })

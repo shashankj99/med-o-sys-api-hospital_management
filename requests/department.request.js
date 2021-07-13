@@ -39,7 +39,7 @@ const DepartmentRequest = {
             await Department.findOne({ where: {name: req.body.name} })
                 .then(department => {
                     if (!department)
-                        next();
+                        return next();
 
                     if (department.id !== parseInt(departmentId))
                         return res.status(422)
@@ -49,8 +49,8 @@ const DepartmentRequest = {
                                     {name: "This name has already been taken"}
                                 ]
                             });
-                    next();
-                }).catch(err => next());
+                    return next();
+                }).catch(err => {return next()});
         },
 
         async function (req, res, next) {
@@ -59,7 +59,7 @@ const DepartmentRequest = {
             await Department.findOne({ where: {nepali_name: req.body.nepali_name} })
                 .then(department => {
                     if (!department)
-                        next();
+                        return next();
 
                     if (department.id !== parseInt(departmentId))
                         return res.status(422)
@@ -69,8 +69,8 @@ const DepartmentRequest = {
                                     {nepali_name: "This nepali name has already been taken"}
                                 ]
                             });
-                    next();
-                }).catch(err => next());
+                    return next();
+                }).catch(err => {return next()});
         },
     ]
 };

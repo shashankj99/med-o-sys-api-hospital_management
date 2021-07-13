@@ -15,23 +15,8 @@ const HospitalController = {
      */
     get_all_hospitals: async (req, res) => {
         try {
-            // forbid users if not super admin
-            if (!AuthUser.has_role(['super admin']))
-                return res.status(401)
-                    .json({
-                        status: 401,
-                        message: 'Forbidden'
-                    });
-
             // get all hospitals
-            await Hospital.findAll({
-                include: {
-                    model: Department,
-                    as: 'departments',
-                    attributes: ['id', 'name', 'nepali_name'],
-                    through: {attributes: []}
-                }
-            }).then(response => {
+            await Hospital.findAll().then(response => {
                     return res.status(200)
                         .json({
                             status: 200,
@@ -131,19 +116,14 @@ const HospitalController = {
             // get hospital id
             let hospitalId = req.params.hospital_id;
 
-            // check if user is super admin or not
-            if (!AuthUser.has_role(['super admin'])) {
-                // check if user is associated to a hospital or not
-                if (!AuthUser.hospital())
-                    // forbid user if not associated
-                    return res.status(401)
+            // if user is a hospital admin then check if user has access to the given hospital
+            if (AuthUser.hospital()) {
+                if (hospitalId !== AuthUser.hospital().hospital_id)
+                    return res.status(403)
                         .json({
-                            status: 401,
+                            status: 403,
                             message: 'Forbidden'
                         });
-
-                // get the hospital id from the AuthUser facade
-                hospitalId = AuthUser.hospital().hospital_id;
             }
 
             // get the required hospital
@@ -196,19 +176,14 @@ const HospitalController = {
             // get hospital id
             let hospitalId = req.params.hospital_id;
 
-            // check if user is super admin or not
-            if (!AuthUser.has_role(['super admin'])) {
-                // check if user is associated with a hospital
-                if (!AuthUser.hospital())
-                    // forbid user if not associated
-                    return res.status(401)
+            // if user is a hospital admin then check if user has access to the given hospital
+            if (AuthUser.hospital()) {
+                if (hospitalId !== AuthUser.hospital().hospital_id)
+                    return res.status(403)
                         .json({
-                            status: 401,
+                            status: 403,
                             message: 'Forbidden'
                         });
-
-                // get the hospital id from the auth user facade
-                hospitalId = AuthUser.hospital().hospital_id;
             }
 
             // transaction object
@@ -294,14 +269,6 @@ const HospitalController = {
      */
     delete_hospital: async (req, res) => {
         try {
-            // forbid users if not super admin
-            if (!AuthUser.has_role(['super admin']))
-                return res.status(401)
-                    .json({
-                        status: 401,
-                        message: 'Forbidden'
-                    });
-
             // get the hospital id
             const hospitalId = req.params.hospital_id;
 
