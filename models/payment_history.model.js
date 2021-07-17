@@ -9,7 +9,7 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
         },
         amount: {
-            type: Sequelize.FLOAT(11, 2),
+            type: Sequelize.FLOAT(11, 2).UNSIGNED,
             allowNull: false,
             defaultValue: 0.00
         },
@@ -18,15 +18,15 @@ module.exports = (sequelize, Sequelize) => {
             allowNull: false
         },
         active_duration_in_years: {
-            type: Sequelize.INTEGER.UNSIGNED,
+            type: Sequelize.FLOAT(11, 2).UNSIGNED,
             allowNull: false
         },
         valid_from: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         valid_till: {
-            type: Sequelize.DATE,
+            type: Sequelize.STRING(50),
             allowNull: false
         },
         status: {

@@ -8,5 +8,6 @@ module.exports = {
     DB_PASSWORD: process.env.DB_PASSWORD,
     DB_DATABASE: process.env.DB_DATABASE,
     DB_DIALECT: process.env.DB_DIALECT,
+    DB_TIMEZONE: process.env.DB_TIMEZONE,
     OAUTH_URL: process.env.OAUTH_URL
 }

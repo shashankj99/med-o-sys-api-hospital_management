@@ -26,7 +26,7 @@ module.exports = (sequelize) => {
         foreignKey: 'paymentable_id',
         constraints: false,
         scope: {
-            commentable_type: 'Hospital'
+            paymentable_type: 'Hospital'
         }
     });
 
