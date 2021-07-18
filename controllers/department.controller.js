@@ -1,6 +1,7 @@
 const db = require('../models');
 
 const Department = db.departments;
+const ModelNotFoundException = require("../exceptions/model-not-found-exception");
 
 const DepartmentController = {
     /**
@@ -88,11 +89,7 @@ const DepartmentController = {
                 .then(department => {
                     // return not found error
                     if (!department)
-                        return res.status(404)
-                            .json({
-                                status: 404,
-                                message: 'Unable to find the department'
-                            });
+                        throw new ModelNotFoundException("Unable to find the department");
 
                     return res.status(200)
                         .json({
@@ -107,6 +104,12 @@ const DepartmentController = {
                         });
                 });
         } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,
@@ -129,6 +132,9 @@ const DepartmentController = {
             // get the department
             await Department.findByPk(departmentId)
                 .then(async department => {
+                    if (!department)
+                        throw new ModelNotFoundException("Unable to find the department");
+
                     // get department attributes
                     const departmentAttributes = {
                         name: req.body.name,
@@ -158,6 +164,12 @@ const DepartmentController = {
                         });
                 });
         } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,
@@ -179,11 +191,7 @@ const DepartmentController = {
             await Department.destroy({ where: {id: departmentId} })
                 .then(department => {
                     if (!department)
-                        return res.status(404)
-                            .json({
-                                status: 404,
-                                message: 'Unable to find any departments'
-                            });
+                        throw new ModelNotFoundException("Unable to find the department");
 
                     return res.status(200)
                         .json({
@@ -198,6 +206,12 @@ const DepartmentController = {
                         });
                 });
         } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,

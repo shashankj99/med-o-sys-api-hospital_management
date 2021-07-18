@@ -1,5 +1,6 @@
 const db = require('../models');
 const AuthUser = require('../facade/auth_user');
+const ModelNotFoundException = require("../exceptions/model-not-found-exception");
 
 const Hospital = db.hospitals;
 const Department = db.departments;
@@ -137,11 +138,7 @@ const HospitalController = {
             }).then(hospital => {
                     // return not found error
                     if (!hospital)
-                        return res.status(404)
-                            .json({
-                                status: 404,
-                                message: 'Unable to find the hospital'
-                            });
+                        throw new ModelNotFoundException("Unable to find the hospital");
 
                     return res.status(200)
                         .json({
@@ -157,6 +154,12 @@ const HospitalController = {
                         });
                 });
         } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,
@@ -194,11 +197,7 @@ const HospitalController = {
                 .then(async hospital => {
                     // return not found error
                     if (!hospital)
-                        return  res.status(404)
-                            .json({
-                                status: 404,
-                                message: 'Unable to find the hospital'
-                            });
+                        throw new ModelNotFoundException("Unable to find the hospital");
 
                     // get hospital attributes
                     const hospitalAttributes= {
@@ -253,6 +252,12 @@ const HospitalController = {
                         })
                 });
         } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,
@@ -276,11 +281,7 @@ const HospitalController = {
             await Hospital.destroy({ where: {id: hospitalId} })
                 .then(hospital => {
                     if (!hospital)
-                        return res.status(404)
-                            .json({
-                                status: 404,
-                                message: 'Unable to find the hospital'
-                            });
+                        throw new ModelNotFoundException("Unable to find the hospital");
 
                     return res.status(200)
                         .json({
@@ -296,6 +297,12 @@ const HospitalController = {
                         })
                 });
         } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,
