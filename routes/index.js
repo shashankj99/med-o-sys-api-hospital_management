@@ -7,6 +7,7 @@ const auth = require('../middleware/auth');
 const HospitalRequest = require('../requests/hospital.request');
 const DepartmentRequest = require('../requests/department.request');
 const PaymentHistoryRequest = require('../requests/payment_history.request');
+const DoctorRequest = require('../requests/doctor.request');
 
 const validation_error = require('../requests/validation_error');
 
@@ -14,6 +15,7 @@ const validation_error = require('../requests/validation_error');
 const HospitalController = require('../controllers/hospital.controller');
 const DepartmentController = require('../controllers/department.controller');
 const PaymentHistroyController = require('../controllers/payment_history.controller');
+const DoctorController = require('../controllers/doctor.controller');
 
 router.get('/', function (req, res) {
     return res.status(200)
@@ -97,6 +99,36 @@ router.put('/hospital/:hospital_id/payment/:payment_id',
 router.delete('/hospital/:hospital_id/payment/:payment_id',
     auth('delete payment'),
     PaymentHistroyController.delete_payment_history
+);
+
+/**
+ * Doctor routes
+ */
+router.get('/hospital/:hospital_id/department/:department_id/doctors', 
+    auth('view doctors'),
+    DoctorController.index
+);
+
+router.post('/hospital/:hospital_id/department/:department_id/doctor', 
+    auth('create doctor'),
+    DoctorRequest.create_doctor_request, validation_error,
+    DoctorController.create
+);
+
+router.get('/hospital/:hospital_id/department/:department_id/doctor/:doctor_id',
+    auth('view doctor detail'),
+    DoctorController.show
+);
+
+router.put('/hospital/:hospital_id/department/:department_id/doctor/:doctor_id',
+    auth('edit doctor'),
+    DoctorRequest.update_doctor_request, validation_error,
+    DoctorController.update
+);
+
+router.delete('/hospital/:hospital_id/department/:department_id/doctor/:doctor_id',
+    auth('delete doctor'),
+    DoctorController.destroy
 );
 
 module.exports = router;

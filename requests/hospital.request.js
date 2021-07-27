@@ -65,7 +65,7 @@ const HospitalRequest = {
             await Hospital.findOne({ where: {email_address: req.body.email_address} })
                 .then(hospital => {
                     if (!hospital)
-                        next();
+                        return next();
 
                     if (hospital.id !== parseInt(hospitalId))
                         return res.status(422)
@@ -85,7 +85,7 @@ const HospitalRequest = {
             await Hospital.findOne({ where: {website: req.body.website} })
                 .then(hospital => {
                     if (!hospital)
-                        next();
+                        return next();
 
                     if (hospital.id !== parseInt(hospitalId))
                         return res.status(422)
