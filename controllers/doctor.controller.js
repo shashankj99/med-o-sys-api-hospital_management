@@ -1,9 +1,6 @@
-const axios = require("axios");
-
 const db = require("../models");
 const AuthUser = require("../facade/auth_user");
 const ModelNotFoundException = require("../exceptions/model-not-found-exception");
-const OAUTH_URL = require('../config').OAUTH_URL;
 const fetchUser = require("../services/fetch_user");
 const ServiceException = require("../exceptions/service.exception");
 
@@ -330,6 +327,53 @@ const DoctorController = {
                         message: err.message
                     });
 
+            return res.status(500)
+                .json({
+                    status: 500,
+                    message: err.message
+                });
+        }
+    },
+
+    /**
+     * Method to change doctor status
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+     change_hospital_status: async (req, res) => {
+        try {
+            const doctorId = req.params.doctor_id;
+
+            // get doctor by id
+            const doctor = await Doctor.findByPk(doctorId);
+
+            if (!doctor)
+                throw new ModelNotFoundException("unable to find the doctor");
+
+            // change doctor status
+            await doctor.update({ status: req.body.status })
+                .then(() => {
+                    return res.status(200)
+                        .json({
+                            status: 200,
+                            message: `Status updated to ${req.body.status}`
+                        });
+                })
+                .catch(err => {
+                    return res.status(500)
+                        .json({
+                            status: 500,
+                            message: err.message
+                        });
+                })
+        } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,

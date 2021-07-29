@@ -99,7 +99,11 @@ const HospitalRequest = {
                     return next();
                 }).catch(err => {return next()});
         }
-    ]
+    ],
+
+    change_status: [
+        check("status").exists().withMessage("Status cannot be empty")
+    ],
 };
 
 module.exports = HospitalRequest;

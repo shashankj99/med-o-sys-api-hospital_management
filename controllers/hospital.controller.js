@@ -309,6 +309,53 @@ const HospitalController = {
                     message: err.message
                 });
         }
+    },
+
+    /**
+     * Method to change hospital status
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    change_hospital_status: async (req, res) => {
+        try {
+            const hospitalId = req.params.hospital_id;
+
+            // get hospital by id
+            const hospital = await Hospital.findByPk(hospitalId);
+
+            if (!hospital)
+                throw new ModelNotFoundException("unable to find the hospital");
+
+            // change hospital status
+            await hospital.update({ status: req.body.status })
+                .then(() => {
+                    return res.status(200)
+                        .json({
+                            status: 200,
+                            message: `Status updated to ${req.body.status}`
+                        });
+                })
+                .catch(err => {
+                    return res.status(500)
+                        .json({
+                            status: 500,
+                            message: err.message
+                        });
+                })
+        } catch (err) {
+            if (err.hasOwnProperty('status'))
+                return res.status(err.status)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
+            return res.status(500)
+                .json({
+                    status: 500,
+                    message: err.message
+                });
+        }
     }
 
 };

@@ -28,22 +28,36 @@ router.get('/', function (req, res) {
 /*
  * Hospital routes
  */
-router.get('/hospitals', auth('view hospitals'),
+router.get('/hospitals', 
+    auth('view hospitals'),
     HospitalController.get_all_hospitals
 );
+
 router.post('/hospital',
     HospitalRequest.create_hospital_request, validation_error,
     HospitalController.create_hospital
 );
-router.get('/hospital/:hospital_id', auth('view hospital detail'),
+
+router.get('/hospital/:hospital_id', 
+    auth('view hospital detail'),
     HospitalController.get_hospital_detail
 );
-router.put('/hospital/:hospital_id', auth('edit hospital'),
+
+router.put('/hospital/:hospital_id', 
+    auth('edit hospital'),
     HospitalRequest.update_hospital_request, validation_error,
     HospitalController.update_hospital_detail
 );
-router.delete('/hospital/:hospital_id', auth('delete hospital'),
+
+router.delete('/hospital/:hospital_id', 
+    auth('delete hospital'),
     HospitalController.delete_hospital
+);
+
+router.put("/change/hospital/status/:hospital_id",
+    auth("change status"),
+    HospitalRequest.change_status, validation_error,
+    HospitalController.change_hospital_status
 );
 
 /*
@@ -101,6 +115,12 @@ router.delete('/hospital/:hospital_id/payment/:payment_id',
     PaymentHistroyController.delete_payment_history
 );
 
+router.put("/change/payment/status/:payment_id",
+    auth("change status"),
+    PaymentHistoryRequest.change_status, validation_error,
+    PaymentHistroyController.change_hospital_status
+);
+
 /**
  * Doctor routes
  */
@@ -129,6 +149,12 @@ router.put('/hospital/:hospital_id/department/:department_id/doctor/:doctor_id',
 router.delete('/hospital/:hospital_id/department/:department_id/doctor/:doctor_id',
     auth('delete doctor'),
     DoctorController.destroy
+);
+
+router.put("/change/doctor/status/:doctor_id",
+    auth("change status"),
+    DoctorRequest.change_status, validation_error,
+    DoctorController.change_hospital_status
 );
 
 module.exports = router;

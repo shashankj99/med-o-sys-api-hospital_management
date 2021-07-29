@@ -7,7 +7,11 @@ const PaymentHistoryRequest = {
 
         check('payment_method').exists().withMessage('Payment method cannot be empty')
             .isString().withMessage('Payment method must be a string')
-    ]
+    ],
+
+    change_status: [
+        check("status").exists().withMessage("Status cannot be empty")
+    ],
 }
 
 module.exports = PaymentHistoryRequest;
