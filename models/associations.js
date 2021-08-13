@@ -69,5 +69,21 @@ module.exports = (sequelize) => {
     sequelize.models.Doctor.belongsTo(sequelize.models.Department, {
         foreignKey: "department_id",
         constraints: true
+    });
+
+    /**
+     * Hospital has many opd hours
+     */
+    sequelize.models.Hospital.hasMany(sequelize.models.OpdHour, {
+        foreignKey: "hospital_id",
+        constraints: true
+    });
+
+    /**
+     * OPD hours belong to a hospital
+     */
+    sequelize.models.OpdHour.belongsTo(sequelize.models.Hospital, {
+        foreignKey: "hospital_id",
+        constraints: true
     })
 }

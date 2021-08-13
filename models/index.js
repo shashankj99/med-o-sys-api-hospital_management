@@ -16,6 +16,7 @@ db.hospitals = require('./hospital_model')(sequelize, Sequelize);
 db.departments = require('./department.model')(sequelize, Sequelize);
 db.paymentHistories = require('./payment_history.model')(sequelize, Sequelize);
 db.doctors = require("./doctor.model")(sequelize, Sequelize);
+db.opdHours = require("./opd_hours.model")(sequelize, Sequelize);
 
 db.associations = require('./associations')(sequelize);
 

@@ -8,6 +8,7 @@ const HospitalRequest = require('../requests/hospital.request');
 const DepartmentRequest = require('../requests/department.request');
 const PaymentHistoryRequest = require('../requests/payment_history.request');
 const DoctorRequest = require('../requests/doctor.request');
+const OpdHourRequest = require("../requests/opd_hours.request");
 
 const validation_error = require('../requests/validation_error');
 
@@ -16,6 +17,7 @@ const HospitalController = require('../controllers/hospital.controller');
 const DepartmentController = require('../controllers/department.controller');
 const PaymentHistroyController = require('../controllers/payment_history.controller');
 const DoctorController = require('../controllers/doctor.controller');
+const OpdHourController = require("../controllers/opd_hour.controller");
 
 router.get('/', function (req, res) {
     return res.status(200)
@@ -155,6 +157,36 @@ router.put("/change/doctor/status/:doctor_id",
     auth("change status"),
     DoctorRequest.change_status, validation_error,
     DoctorController.change_hospital_status
+);
+
+/**
+ * OPD Hour routes
+ */
+router.post("/hospital/:hospital_id/opd/hour",
+    auth("create opd hour"),
+    OpdHourRequest.create_or_update_opd_hour, validation_error,
+    OpdHourController.create
+);
+1
+router.get("/hospital/:hospital_id/opd/hours",
+    auth("view opd hours"),
+    OpdHourController.index
+);
+
+router.get("/hospital/:hospital_id/opd/hour/:opd_hour_id",
+    auth("view opd hour detail"),
+    OpdHourController.show
+);
+
+router.put("/hospital/:hospital_id/opd/hour/:opd_hour_id",
+    auth("edit opd hour"),
+    OpdHourRequest.create_or_update_opd_hour, validation_error,
+    OpdHourController.update
+);
+
+router.delete("/hospital/:hospital_id/opd/hour/:opd_hour_id",
+    auth("delete opd hour"),
+    OpdHourController.destroy
 );
 
 module.exports = router;
