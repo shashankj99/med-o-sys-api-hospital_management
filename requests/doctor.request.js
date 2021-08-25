@@ -27,7 +27,9 @@ const DoctorRequest = {
 
         check("degree").exists().withMessage("Degree cannot be null"),
 
-        check("speciality").exists().withMessage("Speciality is required")
+        check("speciality").exists().withMessage("Speciality is required"),
+
+        check("type").exists().withMessage("A type must be selected for doctor")
     ],
 
     update_doctor_request: [

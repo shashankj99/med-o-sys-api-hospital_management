@@ -9,6 +9,7 @@ const DepartmentRequest = require('../requests/department.request');
 const PaymentHistoryRequest = require('../requests/payment_history.request');
 const DoctorRequest = require('../requests/doctor.request');
 const OpdHourRequest = require("../requests/opd_hours.request");
+const DoctorHourRequest = require('../requests/doctor_hour.request');
 
 const validation_error = require('../requests/validation_error');
 
@@ -18,6 +19,7 @@ const DepartmentController = require('../controllers/department.controller');
 const PaymentHistroyController = require('../controllers/payment_history.controller');
 const DoctorController = require('../controllers/doctor.controller');
 const OpdHourController = require("../controllers/opd_hour.controller");
+const DoctorHourController = require('../controllers/doctor_hour.controller');
 
 router.get('/', function (req, res) {
     return res.status(200)
@@ -30,8 +32,7 @@ router.get('/', function (req, res) {
 /*
  * Hospital routes
  */
-router.get('/hospitals', 
-    auth('view hospitals'),
+router.get('/hospitals',
     HospitalController.get_all_hospitals
 );
 
@@ -156,7 +157,7 @@ router.delete('/hospital/:hospital_id/department/:department_id/doctor/:doctor_i
 router.put("/change/doctor/status/:doctor_id",
     auth("change status"),
     DoctorRequest.change_status, validation_error,
-    DoctorController.change_hospital_status
+    DoctorController.change_doctor_status
 );
 
 /**
@@ -167,9 +168,8 @@ router.post("/hospital/:hospital_id/opd/hour",
     OpdHourRequest.create_or_update_opd_hour, validation_error,
     OpdHourController.create
 );
-1
+
 router.get("/hospital/:hospital_id/opd/hours",
-    auth("view opd hours"),
     OpdHourController.index
 );
 
@@ -187,6 +187,36 @@ router.put("/hospital/:hospital_id/opd/hour/:opd_hour_id",
 router.delete("/hospital/:hospital_id/opd/hour/:opd_hour_id",
     auth("delete opd hour"),
     OpdHourController.destroy
+);
+
+/**
+ * doctor hour routes
+ */
+router.post("/doctor/:doctor_id/hour",
+    auth('create doctor hour'),
+    DoctorHourRequest.create_or_update_doctor_hour, validation_error,
+    DoctorHourController.create
+);
+
+router.get("/doctor/:doctor_id/hours",
+    auth('view doctor hours'),
+    DoctorHourController.index
+);
+
+router.get("/doctor/:doctor_id/hour/:doctor_hour_id",
+    auth("view doctor hour detail"),
+    DoctorHourController.show
+);
+
+router.put("/doctor/:doctor_id/hour/:doctor_hour_id",
+    auth("edit doctor hour"),
+    DoctorHourRequest.create_or_update_doctor_hour, validation_error,
+    DoctorHourController.update
+);
+
+router.delete("/doctor/:doctor_id/hour/:doctor_hour_id",
+    auth("delete doctor hour"),
+    DoctorHourController.destroy
 );
 
 module.exports = router;

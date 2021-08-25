@@ -4,9 +4,11 @@ const ModelNotFoundException = require("../exceptions/model-not-found-exception"
 const fetchUser = require("../services/fetch_user");
 const ServiceException = require("../exceptions/service.exception");
 
+const sequelize = db.sequelize;
 const Doctor = db.doctors;
 const Hospital = db.hospitals;
 const Department = db.departments;
+const DoctorMetaData = db.doctorMetadata;
 
 const DoctorController = {
     /**
@@ -37,20 +39,20 @@ const DoctorController = {
                 status: (req.query.status) ? req.query.status : 1
             }
         })
-        .then(response => {
-            return res.status(200)
-                .json({
-                    status: 200,
-                    data: response
-                })
-        })
-        .catch(err => {
-            return res.status(500)
-                .json({
-                    status: 500,
-                    message: err.message
-                });
-        })
+            .then(response => {
+                return res.status(200)
+                    .json({
+                        status: 200,
+                        data: response
+                    })
+            })
+            .catch(err => {
+                return res.status(500)
+                    .json({
+                        status: 500,
+                        message: err.message
+                    });
+            })
     },
 
     /**
@@ -62,8 +64,8 @@ const DoctorController = {
     create: async (req, res) => {
         try {
             const hospitalId = req.params.hospital_id,
-            departmentId = req.params.department_id;
-            
+                departmentId = req.params.department_id;
+
             // auth check for hospital admin
             if (AuthUser.hospital()) {
                 if (hospitalId !== AuthUser.hospital().hospital_id)
@@ -73,6 +75,8 @@ const DoctorController = {
                             message: "Forbidden"
                         })
             }
+
+            const transaction = await sequelize.transaction();
 
             // fetch hospital and department
             const hospital = await Hospital.findByPk(hospitalId, {
@@ -93,7 +97,7 @@ const DoctorController = {
                 req.body.email_address,
                 req.headers["authorization"]
             );
-            
+
             // throw error if status is not 200
             if (getUserDetailsFromAuthService.status !== 200)
                 throw new ServiceException(
@@ -110,21 +114,43 @@ const DoctorController = {
                 speciality: req.body.speciality,
                 on_call: req.body.on_call,
                 user_id: getUserDetailsFromAuthService.data.id,
-                full_name: getUserDetailsFromAuthService.data.full_name,
+                full_name: `Dr. ${getUserDetailsFromAuthService.data.full_name}`,
                 email_address: getUserDetailsFromAuthService.data.email,
                 mobile_number: getUserDetailsFromAuthService.data.mobile
             };
 
             // add doctor data
-            await Doctor.create(doctorAttributes)
-                .then(() => {
-                    return res.status(200)
-                        .json({
-                            status: 200,
-                            message: "Doctor added successfully and is pending approval"
+            await Doctor.create(doctorAttributes, { transaction })
+                .then(async doctor => {
+
+                    // doctor meta data attributes
+                    const meta_data_attributes = {
+                        doctor_id: doctor.id,
+                        type: req.body.type,
+                        per_patient_time: req.body.per_patient_time
+                    }
+
+                    // create doctor meta data
+                    await DoctorMetaData.create(meta_data_attributes, { transaction })
+                        .then(() => {
+                            transaction.commit();
+                            return res.status(200)
+                                .json({
+                                    status: 200,
+                                    message: "Doctor added successfully and is pending approval"
+                                });
+                        })
+                        .catch(err => {
+                            transaction.rollback();
+                            return res.status(500)
+                                .json({
+                                    stauts: 500,
+                                    message: err.message
+                                });
                         });
                 })
                 .catch(err => {
+                    transaction.rollback();
                     return res.status(500)
                         .json({
                             stauts: 500,
@@ -158,8 +184,8 @@ const DoctorController = {
         try {
             // get requried ids
             const hospitalId = req.params.hospital_id,
-            departmentId = req.params.department_id,
-            doctorId = req.params.doctor_id;
+                departmentId = req.params.department_id,
+                doctorId = req.params.doctor_id;
 
             // fetch doctor
             const doctor = await Doctor.findOne({
@@ -167,6 +193,11 @@ const DoctorController = {
                     id: doctorId,
                     hospital_id: hospitalId,
                     department_id: departmentId
+                },
+                include: {
+                    model: DoctorMetaData,
+                    as: "doctor_meta_data",
+                    attributes: ['type', 'per_patient_time', 'total_patient_count', 'mortality_rate']
                 }
             });
 
@@ -205,8 +236,8 @@ const DoctorController = {
         try {
             // get requried ids
             const hospitalId = req.params.hospital_id,
-            departmentId = req.params.department_id,
-            doctorId = req.params.doctor_id;
+                departmentId = req.params.department_id,
+                doctorId = req.params.doctor_id;
 
             // fetch doctor
             const doctor = await Doctor.findOne({
@@ -214,12 +245,18 @@ const DoctorController = {
                     id: doctorId,
                     hospital_id: hospitalId,
                     department_id: departmentId
+                },
+                include: {
+                    model: DoctorMetaData,
+                    as: "doctor_meta_data"
                 }
             });
 
             // throw error if not found
             if (!doctor)
                 throw new ModelNotFoundException("Unable to find the doctor");
+
+            const transaction = await sequelize.transaction();
 
             // doc attributes
             const doctorAttributes = {
@@ -237,7 +274,7 @@ const DoctorController = {
                     req.body.email_address,
                     req.headers["authorization"]
                 );
-                
+
                 // throw error if status is not 200
                 if (getUserDetailsFromAuthService.status !== 200)
                     throw new ServiceException(
@@ -252,15 +289,36 @@ const DoctorController = {
             }
 
             // update doctor detail
-            await doctor.update(doctorAttributes)
-                .then(() => {
-                    return res.status(200)
-                        .json({
-                            status: 200,
-                            message: "Doctor updated successfully"
+            await doctor.update(doctorAttributes, { transaction })
+                .then(async doctor => {
+
+                    const attributes = {
+                        type: req.body.type,
+                        per_patient_time: req.body.per_patient_time,
+                        total_patient_count: req.body.total_patient_count,
+                        mortality_rate: req.body.mortality_rate
+                    };
+
+                    await doctor.doctor_meta_data.update(attributes, { transaction })
+                        .then(() => {
+                            transaction.commit();
+                            return res.status(200)
+                                .json({
+                                    status: 200,
+                                    message: "Doctor updated successfully"
+                                });
+                        })
+                        .catch(err => {
+                            transaction.rollback();
+                            return res.status(500)
+                                .json({
+                                    stauts: 500,
+                                    message: err.message
+                                });
                         });
                 })
                 .catch(err => {
+                    transaction.rollback();
                     return res.status(500)
                         .json({
                             stauts: 500,
@@ -293,8 +351,8 @@ const DoctorController = {
         try {
             // get requried ids
             const hospitalId = req.params.hospital_id,
-            departmentId = req.params.department_id,
-            doctorId = req.params.doctor_id;
+                departmentId = req.params.department_id,
+                doctorId = req.params.doctor_id;
 
             await Doctor.destroy({
                 where: {
@@ -312,13 +370,13 @@ const DoctorController = {
                         message: "Doctor deleted successfully"
                     });
             })
-            .catch(err => {
-                return res.status(500)
-                    .json({
-                        stauts: 500,
-                        message: err.message
-                    });
-            });
+                .catch(err => {
+                    return res.status(500)
+                        .json({
+                            stauts: 500,
+                            message: err.message
+                        });
+                });
         } catch (err) {
             if (err.hasOwnProperty("status"))
                 return res.status(err.status)
@@ -341,7 +399,7 @@ const DoctorController = {
      * @param {*} res 
      * @returns 
      */
-     change_hospital_status: async (req, res) => {
+    change_doctor_status: async (req, res) => {
         try {
             const doctorId = req.params.doctor_id;
 
