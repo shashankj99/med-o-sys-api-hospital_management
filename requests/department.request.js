@@ -6,29 +6,31 @@ const Department = db.departments;
 const DepartmentRequest = {
     create_department: [
         check('name').exists().withMessage('Name is required')
-            .isString().withMessage('Name must be a string')
+            .isAlpha("en-US", { ignore: " " }).withMessage('Name must be a string')
             .custom(async value => {
-                return await Department.findOne({where: {name: value}})
-                    .then(department => {
-                        if (department)
-                            return Promise.reject('This name has already been taken')
-                    });
+                if (value)
+                    return await Department.findOne({where: {name: value}})
+                        .then(department => {
+                            if (department)
+                                return Promise.reject('This name has already been taken')
+                        });
             }),
 
         check('nepali_name').exists().withMessage('Nepali name is required')
             .isString().withMessage('Nepali name is required')
             .custom(async value => {
-                return await Department.findOne({ where: {nepali_name: value} })
-                    .then(department => {
-                        if (department)
-                            return Promise.reject('This nepali name has already been taken')
-                    });
+                if (value)
+                    return await Department.findOne({ where: {nepali_name: value} })
+                        .then(department => {
+                            if (department)
+                                return Promise.reject('This nepali name has already been taken')
+                        });
             })
     ],
 
     update_department: [
         check('name').exists().withMessage('Name is required')
-            .isString().withMessage('Name must be a string'),
+            .isAlpha("en-US", { ignore: " " }).withMessage('Name must be a string'),
 
         check('nepali_name').exists().withMessage('Nepali name is required')
             .isString().withMessage('Nepali name is required'),

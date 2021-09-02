@@ -4,20 +4,24 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false
         },
-        address: {
-            type: Sequelize.STRING,
+        province_id: {
+            type: Sequelize.INTEGER.UNSIGNED,
             allowNull: false
         },
-        no_of_beds: {
+        district_id: {
             type: Sequelize.INTEGER.UNSIGNED,
-            allowNull: false,
+            allowNull: false
+        },
+        city_id: {
+            type: Sequelize.INTEGER.UNSIGNED,
+            allowNull: false
         },
         phone_no: {
             type: Sequelize.STRING(15),
             validate: {
                 min: 7
             },
-            allowNull: true
+            allowNull: false
         },
         mobile_no: {
             type: Sequelize.STRING(15),

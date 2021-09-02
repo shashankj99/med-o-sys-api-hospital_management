@@ -3,11 +3,14 @@ const moment = require("moment");
 const db = require('../models');
 const AuthUser = require('../facade/auth_user');
 const ModelNotFoundException = require("../exceptions/model-not-found-exception");
+const GetLocationInfo = require("../services/get_location_info");
+const ServiceException = require("../exceptions/service.exception");
 
 const Hospital = db.hospitals;
 const Department = db.departments;
 const sequelize = db.sequelize;
 const OpdHour = db.opdHours;
+const HospitalMetadata = db.hospitalMetaData;
 
 const HospitalController = {
 
@@ -68,8 +71,9 @@ const HospitalController = {
             // get attribute from request body
             const hospitalAttributes = {
                 name: req.body.name,
-                address: req.body.address,
-                no_of_beds: req.body.no_of_beds,
+                province_id: req.body.province_id,
+                district_id: req.body.district_id,
+                city_id: req.body.city_id,
                 phone_no: req.body.phone_no,
                 mobile_no: req.body.mobile_no,
                 email_address: req.body.email_address,
@@ -77,11 +81,34 @@ const HospitalController = {
                 status: false
             }
 
+            // get location from service
+            const location = await GetLocationInfo.getLocations(
+                req.body.province_id, req.body.district_id, req.body.province_id
+            );
+
+            // throw exception if service not found
+            if (location.status !== 200)
+                throw new ServiceException(location.status, location.message);
+
             // transaction object
             const transaction = await sequelize.transaction();
 
             // create hospital
             await Hospital.create(hospitalAttributes, { transaction })
+                .then(async hospital => {
+                    // create hospital metadata
+                    await HospitalMetadata.create({
+                        hospital_id: hospital.id,
+                        province: location.data.province,
+                        district: location.data.district,
+                        city: location.data.city,
+                        type: req.body.type,
+                        no_of_beds: req.body.no_of_beds
+                    }, { transaction });
+                    
+                    // return hospital instance
+                    return hospital;
+                })
                 .then(async hospital => {
                     // get the department id from request
                     const departments = req.body.departments;
@@ -107,7 +134,8 @@ const HospitalController = {
                                     message: err.message
                                 });
                         });
-                }).catch(err => {
+                })
+                .catch(err => {
                     transaction.rollback();
                     return res.status(400)
                         .json({
@@ -116,6 +144,12 @@ const HospitalController = {
                         });
                 });
         } catch (err) {
+            if (err.hasOwnProperty("status"))
+                return res.status(500)
+                    .json({
+                        status: err.status,
+                        message: err.message
+                    });
             return res.status(500)
                 .json({
                     status: 500,
@@ -147,12 +181,19 @@ const HospitalController = {
 
             // get the required hospital
             await Hospital.findByPk(hospitalId, {
-                include: {
-                    model: Department,
-                    as: 'departments',
-                    attributes: ['id', 'name', 'nepali_name'],
-                    through: { attributes: [] }
-                }
+                include: [
+                    {
+                        model: Department,
+                        as: 'departments',
+                        attributes: ['id', 'name', 'nepali_name'],
+                        through: { attributes: [] }
+                    },
+                    {
+                        model: HospitalMetadata,
+                        as: "hospital_metadata",
+                        attributes: ["type", "no_of_beds"]
+                    }
+                ]
             }).then(hospital => {
                 // return not found error
                 if (!hospital)
@@ -210,48 +251,74 @@ const HospitalController = {
             // transaction object
             const transaction = await sequelize.transaction();
 
-            // find the hospital
-            await Hospital.findByPk(hospitalId)
+            // fetch hospital by pk
+            const hospital = await Hospital.findByPk(hospitalId, {
+                include: {
+                    model: HospitalMetadata,
+                    as: "hospital_metadata"
+                }
+            });
+
+            // throw not found exception
+            if (!hospital)
+                throw new ModelNotFoundException("Unable to find the hospital");
+
+            // get hospital attributes
+            const hospitalAttributes = {
+                name: req.body.name,
+                province_id: req.body.province_id,
+                district_id: req.body.district_id,
+                city_id: req.body.city_id,
+                phone_no: req.body.phone_no,
+                mobile_no: req.body.mobile_no,
+                email_address: req.body.email_address,
+                website: req.body.website,
+                status: false
+            };
+
+            // fetch location if attributes don't match
+            if ((hospitalAttributes.province_id !== hospital.province_id) || 
+                (hospitalAttributes.district_id !== hospital.district_id) ||
+                (hospitalAttributes.city_id !== hospital.city_id)
+                ) {
+                // get location from service
+                const location = await GetLocationInfo.getLocations(
+                    req.body.province_id, req.body.district_id, req.body.province_id
+                );
+
+                // throw exception if service not found
+                if (location.status !== 200)
+                    throw new ServiceException(location.status, location.message);
+            }
+            
+            // update hospital data
+            await hospital.update(hospitalAttributes, { transaction })
                 .then(async hospital => {
-                    // return not found error
-                    if (!hospital)
-                        throw new ModelNotFoundException("Unable to find the hospital");
+                    // update hospital meta data
+                    await hospital.hospital_metadata.update({
+                        province: (location) ? location.data.province : hospital.hospital_metadata.province,
+                        district: (location) ? location.data.district : hospital.hospital_metadata.district,
+                        city: (location) ? location.data.city : hospital.hospital_metadata.city,
+                        type: req.body.type,
+                        no_of_beds: req.body.no_of_beds
+                    }, { transaction });
 
-                    // get hospital attributes
-                    const hospitalAttributes = {
-                        name: req.body.name,
-                        address: req.body.address,
-                        no_of_beds: req.body.no_of_beds,
-                        phone_no: req.body.phone_no,
-                        mobile_no: req.body.mobile_no,
-                        email_address: req.body.email_address,
-                        website: req.body.website,
-                    };
+                    return hospital;
+                })
+                .then(async hospital => {
+                    // get the department id
+                    const departmentId = req.body.departments;
 
-                    // update hospital detail
-                    await hospital.update(hospitalAttributes, { transaction })
-                        .then(async () => {
-                            // get the department id
-                            const departmentId = req.body.departments;
-
-                            // get all departments
-                            await Department.findAll({ where: { id: departmentId } })
-                                .then(departments => {
-                                    // set departments for the hospital
-                                    hospital.setDepartments(departments);
-                                    transaction.commit();
-                                    return res.status(200)
-                                        .json({
-                                            status: 200,
-                                            message: 'Hospital updated successfully'
-                                        });
-                                }).catch(err => {
-                                    transaction.rollback();
-                                    return res.status(400)
-                                        .json({
-                                            status: 400,
-                                            message: err.message
-                                        })
+                    // get all departments
+                    await Department.findAll({ where: { id: departmentId } })
+                        .then(departments => {
+                            // set departments for the hospital
+                            hospital.setDepartments(departments);
+                            transaction.commit();
+                            return res.status(200)
+                                .json({
+                                    status: 200,
+                                    message: 'Hospital updated successfully'
                                 });
                         }).catch(err => {
                             transaction.rollback();

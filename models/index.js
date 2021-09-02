@@ -13,6 +13,7 @@ db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
 db.hospitals = require('./hospital_model')(sequelize, Sequelize);
+db.hospitalMetaData = require("./hospital_metadata")(sequelize, Sequelize);
 db.departments = require('./department.model')(sequelize, Sequelize);
 db.paymentHistories = require('./payment_history.model')(sequelize, Sequelize);
 db.doctors = require("./doctor.model")(sequelize, Sequelize);

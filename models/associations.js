@@ -31,6 +31,24 @@ module.exports = (sequelize) => {
     });
 
     /**
+     * Hospital mata data belongs to a hospital
+     */
+    sequelize.models.HospitalMetadata.belongsTo(sequelize.models.Hospital, {
+        foreignKey: "hospital_id",
+        as: "hospital",
+        constraints: true,
+    });
+
+    /**
+     * Hosptial has one meta data
+     */
+    sequelize.models.Hospital.hasOne(sequelize.models.HospitalMetadata, {
+        foreignKey: "hospital_id",
+        as: "hospital_metadata",
+        constraints: true
+    });
+
+    /**
      * Payment history belongs to a hospital
      */
     sequelize.models.PaymentHistory.belongsTo(sequelize.models.Hospital, {
