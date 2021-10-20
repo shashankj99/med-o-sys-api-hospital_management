@@ -162,4 +162,22 @@ module.exports = (sequelize) => {
         as: "doctor",
         constraints: true
     });
+
+    /**
+     * Hospital has many hospital rooms
+     */
+    sequelize.models.Hospital.hasMany(sequelize.models.HospitalRoom, {
+        foreignKey: "hospital_id",
+        as: "hospital_rooms",
+        constraints: true
+    });
+
+    /**
+     * Hospital room belongs to a hospital
+     */
+    sequelize.models.HospitalRoom.belongsTo(sequelize.models.Hospital, {
+        foreignKey: "hospital_id",
+        as: "hospital",
+        constraints: true
+    });
 }

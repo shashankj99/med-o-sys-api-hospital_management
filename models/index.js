@@ -21,6 +21,7 @@ db.opdHours = require("./opd_hours.model")(sequelize, Sequelize);
 db.doctorMetadata = require("./doctor_metadata.model")(sequelize, Sequelize);
 db.doctorHours = require("./doctor_hours.model")(sequelize, Sequelize);
 db.departmentBeds = require("./department_beds")(sequelize, Sequelize);
+db.hospitalRooms = require("./hospital_rooms")(sequelize, Sequelize);
 
 db.associations = require('./associations')(sequelize);
 
