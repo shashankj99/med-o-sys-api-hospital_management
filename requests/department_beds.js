@@ -1,7 +1,7 @@
 const { check } = require('express-validator');
 
 const DepartmentBedRequest = {
-    create_or_update_department: [
+    create_or_update_department_bed: [
         check("hospital_id")
             .exists().withMessage("Hospital Id can not be empty"),
         check("department_id")

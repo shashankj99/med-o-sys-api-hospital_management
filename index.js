@@ -3,7 +3,6 @@ const cors = require("cors");
 
 const db = require('./models');
 const routes = require('./routes');
-const APP_ENV = require("./config").APP_ENV;
 
 const app = express();
 
