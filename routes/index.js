@@ -10,6 +10,7 @@ const PaymentHistoryRequest = require('../requests/payment_history.request');
 const DoctorRequest = require('../requests/doctor.request');
 const OpdHourRequest = require("../requests/opd_hours.request");
 const DoctorHourRequest = require('../requests/doctor_hour.request');
+const DepartmentBedRequest = require('../requests/department_beds');
 
 const validation_error = require('../requests/validation_error');
 
@@ -20,6 +21,7 @@ const PaymentHistroyController = require('../controllers/payment_history.control
 const DoctorController = require('../controllers/doctor.controller');
 const OpdHourController = require("../controllers/opd_hour.controller");
 const DoctorHourController = require('../controllers/doctor_hour.controller');
+const DepartmentBedController = require('../controllers/department_bed.controller');
 
 router.get('/', function (req, res) {
     return res.status(200)
@@ -217,6 +219,36 @@ router.put("/doctor/:doctor_id/hour/:doctor_hour_id",
 router.delete("/doctor/:doctor_id/hour/:doctor_hour_id",
     auth("delete doctor hour"),
     DoctorHourController.destroy
+);
+
+/**
+ * Department beds
+ */
+router.get('/hospital/:hospital_id/department/:department_id/department/beds',
+    auth("view department beds"),
+    DepartmentBedController.index
+);
+
+router.post('/department/bed',
+    auth("create department bed"),
+    DepartmentBedRequest.create_or_update_department, validation_error,
+    DepartmentBedController.create
+);
+
+router.get('/hospital/:hospital_id/department/:department_id/department/bed/:id',
+    auth("view department bed detail"),
+    DepartmentBedController.show
+);
+
+router.put('/department/bed/:id',
+    auth("edit department bed"),
+    DepartmentBedRequest.create_or_update_department, validation_error,
+    DepartmentBedController.update
+);
+
+router.delete('/hospital/:hospital_id/department/:department_id/department/bed',
+    auth("delete department bed"),
+    DepartmentBedController.destroy
 );
 
 module.exports = router;

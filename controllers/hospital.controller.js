@@ -102,8 +102,7 @@ const HospitalController = {
                         province: location.data.province,
                         district: location.data.district,
                         city: location.data.city,
-                        type: req.body.type,
-                        no_of_beds: req.body.no_of_beds
+                        type: req.body.type
                     }, { transaction });
                     
                     // return hospital instance
@@ -299,8 +298,7 @@ const HospitalController = {
                         province: (location) ? location.data.province : hospital.hospital_metadata.province,
                         district: (location) ? location.data.district : hospital.hospital_metadata.district,
                         city: (location) ? location.data.city : hospital.hospital_metadata.city,
-                        type: req.body.type,
-                        no_of_beds: req.body.no_of_beds
+                        type: req.body.type
                     }, { transaction });
 
                     return hospital;

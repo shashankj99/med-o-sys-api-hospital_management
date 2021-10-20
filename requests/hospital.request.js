@@ -21,10 +21,7 @@ const HospitalRequest = {
             .isInt("city id must be a number"),
 
         check('type').exists().withMessage('Hospital type is required')
-            .isAlpha("en-US", {ignore: " "}).withMessage("Hospital type must be a string"),
-
-        check('no_of_beds').exists().withMessage('No of beds is required')
-            .isNumeric().withMessage('No of beds must be a number'),
+            .isAlpha("en-US", {ignore: [" ", "-"]}).withMessage("Hospital type must be a string"),
 
         check('phone_no').exists().withMessage('Phone number is required')
             .custom(async value => {
@@ -81,9 +78,6 @@ const HospitalRequest = {
             .isAlpha("en-US", {ignore: " "}).withMessage("Hospital type must be a string"),
 
         check('phone_no').exists().withMessage('Phone number is required'),
-
-        check('no_of_beds').exists().withMessage('No of beds is required')
-            .isNumeric().withMessage('No of beds must be a number'),
 
         check('email_address').exists().withMessage('Email address is required')
             .isEmail().withMessage('Email address must be a valid email'),

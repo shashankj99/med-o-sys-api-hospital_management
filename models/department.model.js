@@ -9,6 +9,11 @@ module.exports = (sequelize, Sequelize) => {
             type: Sequelize.STRING,
             allowNull: false,
             unique: true
+        },
+        no_of_beds: {
+            type: Sequelize.INTEGER.UNSIGNED,
+            allowNull: false,
+            defaultValue: 0
         }
     }, {
         tableName: 'departments',

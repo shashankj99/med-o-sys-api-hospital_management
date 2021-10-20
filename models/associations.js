@@ -20,6 +20,24 @@ module.exports = (sequelize) => {
     });
 
     /**
+     * Department has many department beds
+     */
+    sequelize.models.Department.hasMany(sequelize.models.DepartmentBed, {
+        foreignKey: "department_id",
+        as: "department_beds",
+        constraints: true
+    });
+
+    /**
+     * DepartmentBed belongs to a department
+     */
+    sequelize.models.DepartmentBed.belongsTo(sequelize.models.Department, {
+        foreignKey: "department_id",
+        as: "department",
+        constraints: true
+    });
+
+    /**
      * Hospital has many payment histories
      */
     sequelize.models.Hospital.hasMany(sequelize.models.PaymentHistory, {

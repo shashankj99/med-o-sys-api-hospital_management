@@ -26,10 +26,6 @@ module.exports = (sequelize, Sequelize) => {
                 'general', 'speciality', 'multi-speciality', 'trauma-center'
             ),
             allowNull: false
-        },
-        no_of_beds: {
-            type: Sequelize.INTEGER.UNSIGNED,
-            allowNull: false
         }
     }, {
         timestamps: false,
