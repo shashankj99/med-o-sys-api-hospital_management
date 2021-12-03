@@ -20,6 +20,46 @@ module.exports = (sequelize) => {
     });
 
     /**
+     * Department belongs to many Treatments
+     */
+    sequelize.models.Department.belongsToMany(sequelize.models.Treatment, {
+        through: 'department_treatment',
+        foreignKey: 'department_id',
+        as: 'treatments',
+        timestamps: false
+    });
+
+    /**
+     * Treatment belongs to many Departments
+     */
+     sequelize.models.Treatment.belongsToMany(sequelize.models.Department, {
+        through: 'department_treatment',
+        foreignKey: 'treatment_id',
+        as: 'departments',
+        timestamps: false
+    });
+
+    /**
+     * Hospital belongs to many Treatments
+     */
+     sequelize.models.Hospital.belongsToMany(sequelize.models.Treatment, {
+        through: 'hospital_treatment',
+        foreignKey: 'hospital_id',
+        as: 'treatments',
+        timestamps: false
+    });
+
+    /**
+     * Treatment belongs to many Hospitals
+     */
+     sequelize.models.Treatment.belongsToMany(sequelize.models.Hospital, {
+        through: 'hospital_treatment',
+        foreignKey: 'treatment_id',
+        as: 'hospitals',
+        timestamps: false
+    });
+
+    /**
      * Department has many department beds
      */
     sequelize.models.Department.hasMany(sequelize.models.DepartmentBed, {

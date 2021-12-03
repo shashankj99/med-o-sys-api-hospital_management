@@ -12,6 +12,7 @@ const OpdHourRequest = require("../requests/opd_hours.request");
 const DoctorHourRequest = require('../requests/doctor_hour.request');
 const DepartmentBedRequest = require('../requests/department_beds');
 const HospitalRoomRequest = require('../requests/hospital_rooms.request');
+const TreatmentRequest = require('../requests/treatment.request');
 
 const validation_error = require('../requests/validation_error');
 
@@ -24,6 +25,7 @@ const OpdHourController = require("../controllers/opd_hour.controller");
 const DoctorHourController = require('../controllers/doctor_hour.controller');
 const DepartmentBedController = require('../controllers/department_bed.controller');
 const HospitalRoomController = require('../controllers/hospital_room.controller');
+const TreatmentController = require('../controllers/treatment.controller');
 
 router.get('/', function (req, res) {
     return res.status(200)
@@ -67,6 +69,12 @@ router.put("/change/hospital/status/:hospital_id",
     HospitalController.change_hospital_status
 );
 
+router.put("/hospital/:hospital_id/treatments",
+    auth("edit hospital"),
+    HospitalRequest.hospital_treatment, validation_error,
+    HospitalController.update_hospital_treatments
+);
+
 /*
  * Department routes
  */
@@ -75,7 +83,8 @@ router.get('/departments',
 );
 
 router.post('/department', auth('create department'),
-    DepartmentRequest.create_department, validation_error,
+    DepartmentRequest.create_department, DepartmentRequest.department_treatment,
+    validation_error,
     DepartmentController.create_department
 );
 
@@ -84,7 +93,8 @@ router.get('/department/:department_id', auth('view department detail'),
 );
 
 router.put('/department/:department_id', auth('edit department'),
-    DepartmentRequest.update_department, validation_error,
+    DepartmentRequest.update_department, DepartmentRequest.department_treatment,
+    validation_error,
     DepartmentController.update_department
 );
 
@@ -281,6 +291,36 @@ router.put("/hospital/:hospital_id/room/:id",
 router.delete('/hospital/:hospital_id/room/:id',
     auth("delete hospital room"),
     HospitalRoomController.destroy
+);
+
+/**
+ * Treatments
+ */
+router.get('/treatments',
+    auth("view treatments"),
+    TreatmentController.index
+);
+
+router.post('/treatment',
+    auth("create treatment"),
+    TreatmentRequest.create_treatment, validation_error,
+    TreatmentController.create
+);
+
+router.get('/treatment/:id', 
+    auth("view treatment detail"),
+    TreatmentController.show
+);
+
+router.put('/treatment/:id', 
+    auth("edit treatment"),
+    TreatmentRequest.update_treatment, validation_error,
+    TreatmentController.update
+);
+
+router.delete('/treatment/:id', 
+    auth("delete treatment"),
+    TreatmentController.delete
 );
 
 module.exports = router;

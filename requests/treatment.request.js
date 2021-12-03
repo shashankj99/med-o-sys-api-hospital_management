@@ -1,17 +1,17 @@
 const { check } = require('express-validator');
 const db = require('../models');
 
-const Department = db.departments;
+const Treatment = db.treatments;
 
-const DepartmentRequest = {
-    create_department: [
+const TreatmentRequest = {
+    create_treatment: [
         check('name').exists().withMessage('Name is required')
             .isAlpha("en-US", { ignore: " " }).withMessage('Name must be a string')
             .custom(async value => {
                 if (value)
-                    return await Department.findOne({where: {name: value}})
-                        .then(department => {
-                            if (department)
+                    return await Treatment.findOne({where: {name: value}})
+                        .then(treatment => {
+                            if (treatment)
                                 return Promise.reject('This name has already been taken')
                         });
             }),
@@ -20,15 +20,22 @@ const DepartmentRequest = {
             .isString().withMessage('Nepali name must be string')
             .custom(async value => {
                 if (value)
-                    return await Department.findOne({ where: {nepali_name: value} })
-                        .then(department => {
-                            if (department)
+                    return await Treatment.findOne({ where: {nepali_name: value} })
+                        .then(treatment => {
+                            if (treatment)
                                 return Promise.reject('This nepali name has already been taken')
                         });
             }),
+
+        check("type").exists().withMessage("Treatement type is required")
+            .isIn(["general", "consulting", "surgical", "therapy"])
+            .withMessage("Treatment type must be either general, consulting, surgical or therapy"),
+
+        check("price").exists().withMessage("Treatement price is required")
+            .isFloat().withMessage("Treatment price must be a decimal number")
     ],
 
-    update_department: [
+    update_treatment: [
         check('name').exists().withMessage('Name is required')
             .isAlpha("en-US", { ignore: " " }).withMessage('Name must be a string'),
 
@@ -36,14 +43,14 @@ const DepartmentRequest = {
             .isString().withMessage('Nepali name must be string'),
 
         async function (req, res, next) {
-            const departmentId = req.params.department_id;
+            const treatmentId = req.params.id;
 
-            await Department.findOne({ where: {name: req.body.name} })
-                .then(department => {
-                    if (!department)
+            await Treatment.findOne({ where: {name: req.body.name} })
+                .then(treatment => {
+                    if (!treatment)
                         return next();
 
-                    if (department.id !== parseInt(departmentId))
+                    if (treatment.id !== parseInt(treatmentId))
                         return res.status(422)
                             .json({
                                 status: 422,
@@ -56,14 +63,14 @@ const DepartmentRequest = {
         },
 
         async function (req, res, next) {
-            const departmentId = req.params.department_id;
+            const treatmentId = req.params.id;
 
-            await Department.findOne({ where: {nepali_name: req.body.nepali_name} })
-                .then(department => {
-                    if (!department)
+            await Treatment.findOne({ where: {nepali_name: req.body.nepali_name} })
+                .then(treatment => {
+                    if (!treatment)
                         return next();
 
-                    if (department.id !== parseInt(departmentId))
+                    if (treatment.id !== parseInt(treatmentId))
                         return res.status(422)
                             .json({
                                 status: 422,
@@ -74,17 +81,14 @@ const DepartmentRequest = {
                     return next();
                 }).catch(err => {return next()});
         },
-    ],
 
-    department_treatment: [
-        check("treatments")
-        .exists()
-        .withMessage("Treatments are required")
-        .isArray()
-        .withMessage("Treatments must be an array of treatment id")
-        .notEmpty()
-        .withMessage("Treatments cannot be empty")
+        check("type").exists().withMessage("Treatement type is required")
+            .isIn(["general", "consulting", "surgical", "therapy"])
+            .withMessage("Treatment type must be either general, consulting, surgical or therapy"),
+
+        check("price").exists().withMessage("Treatement price is required")
+            .isFloat().withMessage("Treatment price must be a decimal number")
     ]
 };
 
-module.exports = DepartmentRequest;
+module.exports = TreatmentRequest;

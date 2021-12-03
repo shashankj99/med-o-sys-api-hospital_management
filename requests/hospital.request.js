@@ -75,7 +75,7 @@ const HospitalRequest = {
             .isInt("city id must be a number"),
 
         check('type').exists().withMessage('Hospital type is required')
-            .isAlpha("en-US", {ignore: " "}).withMessage("Hospital type must be a string"),
+            .isAlpha("en-US", {ignore: [" ", "-"]}).withMessage("Hospital type must be a string"),
 
         check('phone_no').exists().withMessage('Phone number is required'),
 
@@ -150,6 +150,16 @@ const HospitalRequest = {
     change_status: [
         check("status").exists().withMessage("Status cannot be empty")
     ],
+
+    hospital_treatment: [
+        check("treatments")
+        .exists()
+        .withMessage("Treatments are required")
+        .isArray()
+        .withMessage("Treatments must be an array of treatment id")
+        .notEmpty()
+        .withMessage("Treatments cannot be empty")
+    ]
 };
 
 module.exports = HospitalRequest;

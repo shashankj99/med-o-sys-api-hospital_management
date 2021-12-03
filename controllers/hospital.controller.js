@@ -185,12 +185,26 @@ const HospitalController = {
                         model: Department,
                         as: 'departments',
                         attributes: ['id', 'name', 'nepali_name'],
-                        through: { attributes: [] }
+                        through: { attributes: [] },
+                        include: {
+                            model: db.treatments,
+                            as: "treatments",
+                            attributes: ["id", "name", "nepali_name"],
+                            required: false,
+                            through: { attributes: [] }
+                        }
                     },
                     {
                         model: HospitalMetadata,
                         as: "hospital_metadata",
-                        attributes: ["type", "no_of_beds"]
+                        attributes: ["type"]
+                    },
+                    {
+                        model: db.treatments,
+                        as: "treatments",
+                        attributes: ["id"],
+                        required: false,
+                        through: { attributes: [] }
                     }
                 ]
             }).then(hospital => {
@@ -295,9 +309,9 @@ const HospitalController = {
                 .then(async hospital => {
                     // update hospital meta data
                     await hospital.hospital_metadata.update({
-                        province: (location) ? location.data.province : hospital.hospital_metadata.province,
-                        district: (location) ? location.data.district : hospital.hospital_metadata.district,
-                        city: (location) ? location.data.city : hospital.hospital_metadata.city,
+                        province: (typeof location != "undefined") ? location.data.province : hospital.hospital_metadata.province,
+                        district: (typeof location != "undefined") ? location.data.district : hospital.hospital_metadata.district,
+                        city: (typeof location != "undefined") ? location.data.city : hospital.hospital_metadata.city,
                         type: req.body.type
                     }, { transaction });
 
@@ -436,6 +450,55 @@ const HospitalController = {
             return res.status(500)
                 .json({
                     status: 500,
+                    message: err.message
+                });
+        }
+    },
+
+    /**
+     * @description Method to update the hospital treatments
+     * @param {*} req 
+     * @param {*} res 
+     * @returns 
+     */
+    update_hospital_treatments: async (req, res) => {
+        try {
+            const hospital_id = req.params.hospital_id,
+                treatments = req.body.treatments;
+
+            await Hospital.findByPk(hospital_id)
+                .then(async hospital => {
+                    await db.treatments.findAll({where: {id: treatments}})
+                        .then((treatments) => {
+                            if (treatments.length == 0)
+                                throw new ModelNotFoundException("Treatments couldn't be found");
+
+                            hospital.setTreatments(treatments);
+
+                            return res.status(200)
+                                .json({
+                                    message: "Treatments updated for hospital"
+                                });
+                        }).catch((err) => {
+                            if (err.hasOwnProperty('status'))
+                                return res.status(err.status)
+                                    .json({
+                                        message: err.message
+                                    });
+                            return res.status(500)
+                                .json({
+                                    message: err.message
+                                });
+                        });
+                }).catch(err => {
+                    return res.status(500)
+                        .json({
+                            message: err.message
+                        });
+                });
+        } catch (err) {
+            return res.status(500)
+                .json({
                     message: err.message
                 });
         }
