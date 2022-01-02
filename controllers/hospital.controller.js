@@ -22,6 +22,8 @@ const HospitalController = {
      */
     get_all_hospitals: async (req, res) => {
         try {
+            const offset = req.query.offset;
+
             const weekDays = [
                 "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
             ],
@@ -29,15 +31,23 @@ const HospitalController = {
 
             // get all hospitals
             await Hospital.findAll({
-                include: {
-                    model: OpdHour,
-                    as: "opd_hours",
-                    attributes: ["opening_time", "closing_time"],
-                    where: {
-                        day: weekDays[dateIndex]
+                include: [
+                    {
+                        model: OpdHour,
+                        as: "opd_hours",
+                        attributes: ["opening_time", "closing_time"],
+                        where: {
+                            day: weekDays[dateIndex]
+                        },
+                        required: false
                     },
-                    required: false
-                }
+                    {
+                        model: db.hospitalMetaData,
+                        as: "hospital_metadata",
+                    }
+                ],
+                limit: 10,
+                offset
             }).then(response => {
                 return res.status(200)
                     .json({
